@@ -93,8 +93,55 @@ const start = async () => {
 
 // Function to view all departments
 const viewAllDepartments = async () => {
-    
+    const query = `SELECT * FROM department`; // MySQL query to retrieve requested data
+    const [res] = await connection.query(query); // executes db query, waits for the completion, extracts the returned array result, then puts the result inside [res]
+    console.table(res); // Show data in formatted table
+    start(); // Main menu
 };
 
+// Function to view all roles
+const viewAllRoles = async () => {
+    const query = `
+        SELECT role.id,
+               role.title,
+               role.salary,
+               department.name AS department 
+        FROM 
+               role
+               LEFT JOIN department ON role.department_id = department.id
+    `;
+    const [res] = await connection.query(query);
+    console.table(res);
+    start();
+};
+
+// Function to view all employees
+const viewAllEmployees = async () => {
+    const query = `{
+        SELECT employee.id,
+               employee.first_name,
+               employee.last_name,
+               role.title AS job_title,
+               department.name AS department,
+               role.salary,
+               CONCAT(manager.first_name, '', manager.last_name) AS manager
+        FROM
+               employee
+               LEFT JOIN role ON employee.role_id = role.id
+               LEFT JOIN department ON role.department_id = department.id
+               LEFT JOIN employee manager ON employee.manager_id = manager.id
+    }`;
+};
+
+
+addDepartment()
+addRole()
+addEmployee()
+updateEmployee()
+//viewByManager()
+//viewByDepartment()
+//viewBudget()
+//updateManager()
+//deleteDRE()
 
 

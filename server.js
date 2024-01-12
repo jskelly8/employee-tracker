@@ -1,16 +1,13 @@
 const inquirer = require('inquirer');
-const { up } = require('inquirer/lib/utils/readline');
 const mysql = require('mysql2');
 
 // MySQL Connection
-const connection = mysql.createConnection(
-    {
+const connection = mysql.createConnection({
         host: 'localhost',
         user: 'root',
         password: '', // Fill yours in here
         database: 'company_db'
-    }
-);
+});
 
 // Database Connection
 connection.connect((err) => {
@@ -118,20 +115,20 @@ const viewAllRoles = async () => {
 
 // Function to view all employees
 const viewAllEmployees = async () => {
-    const query = `{
+    const query = `
         SELECT employee.id,
                employee.first_name,
                employee.last_name,
                role.title AS job_title,
                department.name AS department,
                role.salary,
-               CONCAT(manager.first_name, '', manager.last_name) AS manager
+               CONCAT(manager.first_name, ' ', manager.last_name) AS manager
         FROM
                employee
                LEFT JOIN role ON employee.role_id = role.id
                LEFT JOIN department ON role.department_id = department.id
                LEFT JOIN employee manager ON employee.manager_id = manager.id
-    }`;
+    `;
     const [res] = await connection.query(query);
     console.table(res);
     start();
@@ -150,8 +147,8 @@ const addDepartment = async () => {
 
     // Put the new department into the database
     const query = `INSERT INTO department SET ?`;
-    await connection.query(query, { name: answer.name});
-    console.log('Department sucessfully added.');
+    await connection.query(query, { name: answer.name });
+    console.log('Department successfully added.');
     start();
 };
 
@@ -181,14 +178,14 @@ const addRole = async () => {
 
     const query = `INSERT INTO role SET ?`;
     await connection.query(query, { title: answer.title, salary: answer.salary, department_id: answer.department_id });
-    console.log('Role sucessfully added.');
+    console.log('Role successfully added.');
     start();
 };
 
 // Function to add a new employee
 const addEmployee = async () => {
     const [roles] = await connection.query(`SELECT id, title FROM role`);
-    const [employees] = await connection.query(`SELECT id, CONCAT(first_name, '', last_name) AS full_name FROM employee`);
+    const [employees] = await connection.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS full_name FROM employee`);
 
     const answer = await inquirer.prompt([
         {
@@ -203,7 +200,7 @@ const addEmployee = async () => {
         },
         {
             type: 'list',
-            name: 'role.id',
+            name: 'role_id',
             message: 'Select the role for the new employee: ',
             choices: roles.map(role => ({ name: role.title, value: role.id }))
         },
@@ -222,11 +219,36 @@ const addEmployee = async () => {
         role_id: answer.role_id,
         manager_id: answer.manager_id
     });
-    console.log('Employee sucessfully added.');
+    console.log('Employee successfully added.');
     start();
 };
 
-updateEmployee()
+// Function to update an employee
+const updateEmployee = async () => {
+    const [employees] = await connection.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS full_name FROM employee`);
+    const [roles] = await connection.query(`SELECT id, title FROM role`);
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee_id',
+            message: 'Select which employee you wish to update the role of: ',
+            choices: [...employees.map(employee => ({ name: employee.full_name, value: employee.id }))]
+        },
+        {
+            type: 'list',
+            name: 'role_id',
+            message: 'Select the new role for the employee: ',
+            choices: roles.map(role => ({ name: role.title, value: role.id }))
+        }
+    ]);
+
+    const query = `UPDATE employee SET role_id = ? WHERE id = ?`;
+    await connection.query(query, [answer.role_id, answer.employee_id]);
+    console.log('Employee successfully updated.');
+    start();
+};
+
 //viewByManager()
 //viewByDepartment()
 //viewBudget()

@@ -131,11 +131,59 @@ const viewAllEmployees = async () => {
                LEFT JOIN department ON role.department_id = department.id
                LEFT JOIN employee manager ON employee.manager_id = manager.id
     }`;
+    const [res] = await connection.query(query);
+    console.table(res);
+    start();
 };
 
+// Function to add a department
+const addDepartment = async () => {
+    // Prompt to have user input name of new department
+    const answer = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'name',
+            message: 'Enter the name of the new department: '
+        }
+    ]);
 
-addDepartment()
-addRole()
+    // Put the new department into the database
+    const query = `INSERT INTO department SET ?`;
+    await connection.query(query, { name: answer.name});
+    console.log('Department sucessfully added.');
+    start();
+};
+
+// Function to add a role
+const addRole = async () => {
+    // Pull the list of departments for the user to choose in the coming prompts
+    const [departments] = await connection.query(`SELECT id, name FROM department`);
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'title',
+            message: 'Enter the title of the new role: '
+        },
+        {
+            type: 'input',
+            name: 'salary',
+            message: 'Enter the salary for the new role: '
+        },
+        {
+            type: 'list',
+            name: 'department_id',
+            message: 'Select the department of the new role: ',
+            choices: departments.map(department => ({ name: department.name, value: department.id }))
+        }
+    ]);
+
+    const query = `INSERT INTO role SET ?`;
+    await connection.query(query, { title: answer.title, salary: answer.salary, department_id: answer.department_id });
+    console.log('Role sucessfully added.');
+    start();
+};
+
 addEmployee()
 updateEmployee()
 //viewByManager()

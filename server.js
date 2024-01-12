@@ -1,4 +1,5 @@
 const inquirer = require('inquirer');
+const { up } = require('inquirer/lib/utils/readline');
 const mysql = require('mysql2');
 
 // MySQL Connection
@@ -184,7 +185,47 @@ const addRole = async () => {
     start();
 };
 
-addEmployee()
+// Function to add a new employee
+const addEmployee = async () => {
+    const [roles] = await connection.query(`SELECT id, title FROM role`);
+    const [employees] = await connection.query(`SELECT id, CONCAT(first_name, '', last_name) AS full_name FROM employee`);
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'input',
+            name: 'first_name',
+            message: 'Enter the first name of the new employee: '
+        },
+        {
+            type: 'input',
+            name: 'last_name',
+            message: 'Enter the last name of the new employee: '
+        },
+        {
+            type: 'list',
+            name: 'role.id',
+            message: 'Select the role for the new employee: ',
+            choices: roles.map(role => ({ name: role.title, value: role.id }))
+        },
+        {
+            type: 'list',
+            name: 'manager_id',
+            message: 'Select the manager for the new employee: ',
+            choices: [...employees.map(employee => ({ name: employee.full_name, value: employee.id }))]
+        }
+    ]);
+
+    const query = `INSERT INTO employee SET ?`;
+    await connection.query(query, {
+        first_name: answer.first_name,
+        last_name: answer.last_name,
+        role_id: answer.role_id,
+        manager_id: answer.manager_id
+    });
+    console.log('Employee sucessfully added.');
+    start();
+};
+
 updateEmployee()
 //viewByManager()
 //viewByDepartment()

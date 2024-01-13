@@ -66,21 +66,27 @@ const start = async () => {
         case 'Update an Employee':
             await updateEmployee();
             break;
-        // case 'View Employees by Manager':
-            // await viewByManager();
-            // break;
-        // case 'View Employees by Department':
-            // await viewByDepartment();
-            // break;
-        // case 'View total utilized budget':
-            // await viewBudget();
-            // break;
-        // case Update an Employee's Manager:
-            // await updateManager();
-            // break;
-        // case Delete a Department, Role, or Employee: --- separate out???
-            // await deleteDRE();
-            // break;
+        case 'View Employees by Manager':
+            await viewByManager();
+            break;
+        case 'View Employees by Department':
+            await viewByDepartment();
+            break;
+        case 'View total utilized budget':
+            await viewBudget();
+            break;
+        case 'Update Manager of an Employee':
+            await updateManager();
+            break;
+        case 'Delete a Department':
+            await deleteDepartment();
+            break;
+        case 'Delete a Role':
+            await deleteRole();
+            break;
+        case 'Delete an Employee':
+            await deleteEmployee();
+            break;
         case 'Exit':
             connection.end();
             break;
@@ -249,10 +255,156 @@ const updateEmployee = async () => {
     start();
 };
 
-//viewByManager()
-//viewByDepartment()
-//viewBudget()
-//updateManager()
-//deleteDRE()
+// Function to view employess grouped by manager
+const viewByManager = async () => {
+    const [managers] = await connection.query('SELECT DISTINCT manager_id FROM employee WHERE manager_id IS NOT NULL');
+    
+    const answer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'manager_id',
+            message: 'Select the manager to view the employees they oversee: ',
+            choices: managers.map(manager => ({ name: `Manager ${manager.manager_id}`, value: manager.manager_id }))
+        }
+    ]);
 
+    const query = `
+        SELECT 
+            employee.id,
+            employee.first_name,
+            employee.last_name,
+            role.title AS job_title,
+            department.name AS depeartment,
+            role.salary
+        FROM
+            employee
+            LEFT JOIN role ON employee.role_id = role.id
+            LEFT JOIN department on role.department_id = department.id
+        WHERE
+            employee.id IN (1, 2, 3, 4, 5, 6, 7)
+    `;
 
+    const [res] = await connection.query(query, [answer.manager_id]);
+    console.table(res);
+    start();
+};
+
+// Function to view employees by Department
+const viewByDepartment = async () => {
+    const [departments] = await connection.query('SELECT id, name FROM department');
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'department_id',
+            message: 'Select the department you wish to see the employees of: ',
+            choices: departments.map(department => ({ name: department.name, value: department.id }))
+        }
+    ]);
+
+    const query = `
+        SELECT
+            employee.id,
+            employee.first_name,
+            employee.last_name,
+            role.title AS job_title,
+            role.salary
+        FROM
+            employee
+            LEFT JOIN role ON employee.role_id = role.id
+        WHERE
+            role.department_id = ?
+    `;
+
+    const [res] = await connection.query(query, [answer.department_id]);
+    console.table(res);
+    start();
+};
+
+// Function to view the total utilized budget
+const viewBudget = async () => {
+     
+};
+
+//Function to update the manager of an employee
+const updateManager = async () => {
+    const [employees] = await connection.query('SELECT id, first_name, last_name FROM employee');
+
+    const answer = await inquirer.prompt ([
+        {
+            type: 'list',
+            name: 'employee_id',
+            message: 'Select the employee you wish to update the manager of: ',
+            choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee_id }))
+        },
+        {
+            type: 'list',
+            name: 'manager_id',
+            message: 'Select the new manager for the chosen employee: ',
+            choices: employees.map(employee => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee_id }))
+        }
+    ])
+
+    const query = 'UPDATE employee SET manager_id = ? WHERE id = ?';
+
+    await connection.query(query, [answer.manager_id, answer.employee_id]);
+    console.log('Manager of employee successfully updated.');
+    start();
+};
+
+// Function to delete a Department
+const deleteDepartment = async () => {
+    const [departments] = await connection.query('SELECT id, name FROM department');
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'department_id',
+            message: 'Select the Department you wish to delete: ',
+            choices: departments.map(department => ({ name: department.name, value: department.id }))
+        }
+    ]);
+
+    const query = 'DELETE FROM department WHERE id = ?';
+    await connection.query(query, [answer.department_id]);
+    console.log('Department successfully deleted.');
+    start();
+};
+
+// Function to delete a Role
+const deleteRole = async () => {
+    const [roles] = await connection.query('SELECT id, title FROM role');
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'role_id',
+            message: 'Select the role you wish to delete: ',
+            choices: roles.map(role => ({ name: role.title, value: role.id }))
+        }
+    ]);
+
+    const query = 'DELETE FROM role WHERE id = ?';
+    await connection.query(query, [answer.role_id]);
+    console.log('Role successfully deleted.');
+    start();
+};
+
+// Function to delete an Employee
+const deleteEmployee = async () => {
+    const [employees] = await connection.query('SELECT id, CONCAT(first_name, " ", last_name) AS full_name FROM employee');
+
+    const answer = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'employee_id',
+            message: 'Select the employee you wish to delete: ',
+            choices: employees.map(employee => ({ name: employee.full_name, value: employee.id }))
+        }
+    ]);
+
+    const query = 'DELETE FROM employee WHERE id = ?';
+    await connection.query(query, [answer.employee_id]);
+    console.log('Employee successfully deleted.');
+    start();
+};

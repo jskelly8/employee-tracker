@@ -379,9 +379,11 @@ function viewByManager() {
 // Function to view employees by Department
 function viewByDepartment() {
     try {
+        // Fetch departments from the database
         connection.query('SELECT id, name FROM department', function (err, departments) {
             if (err) throw err;
 
+            // Prompt user to choose a department
             inquirer
                 .prompt([
                     {
@@ -392,6 +394,7 @@ function viewByDepartment() {
                     },
                 ])
                 .then(function (answer) {
+                    // SQL query to retrieve employees of the selected department
                     const query = `
                         SELECT 
                             employee.id,
@@ -405,19 +408,24 @@ function viewByDepartment() {
                             LEFT JOIN role ON employee.role_id = role.id
                             LEFT JOIN department on role.department_id = department.id
                         WHERE
-                            employee.manager_id = ?
+                            role.department_id = ?
                     `;
 
+                    // Execute the query with the selected department_id
                     connection.query(query, [answer.department_id], function (err, res) {
                         if (err) throw err;
+
+                        // Display the result in a table format
                         console.table(res);
+
+                        // Call the start function (assuming it's defined somewhere)
                         start();
                     });
                 });
         });
     } catch (error) {
         throw error;
-    };
+    }
 };
 
 // Function to view the total utilized budget

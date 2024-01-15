@@ -17,7 +17,7 @@ VALUES ('Chief Executive Officer', 500000.00, 1),
        ('Sales Team Member', 80000.00, 2),
        ('Advertising Team Member', 80000.00, 2),
        ('Production Team Member', 80000.00, 3),
-       ('Customer Service Team Member', 50245.12, 4),
+       ('Customer Service Team Member', 50245.12, 3),
        ('Finance Team Member', 80000.00, 4),
        ('Human Resource Team Member', 80000.00, 4);
 

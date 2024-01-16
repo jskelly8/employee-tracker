@@ -11,6 +11,7 @@
     "license": "MIT",
     "description": "*******WILL ADD LATER************",
     "dependencies": {
+        "dotenv": "^16.3.1",
         "inquirer": "^8.2.6",
         "mysql2": "^2.3.3"
     }

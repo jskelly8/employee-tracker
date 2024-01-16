@@ -1,11 +1,12 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql2');
+require('dotenv').config();
 
 // MySQL Connection
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '', // Fill yours in here
+    password: process.env.DB_PW, // Fill yours in here if testing code
     database: 'company_db',
 });
 
@@ -77,7 +78,7 @@ function start() {
                 case 'View total utilized budget':
                     viewBudget();
                     break;
-                case 'Update Manager of an Employee':
+                case 'Update Manager of Employee':
                     updateManager();
                     break;
                 case 'Delete a Department':
@@ -333,7 +334,7 @@ function updateEmployee() {
 // Function to view employees grouped by manager
 function viewByManager() {
     try {
-        connection.query('SELECT DISTINCT manager_id, CONCAT(first_name, " ", last_name) AS manager_name FROM employee WHERE manager_id IS NOT NULL AND role_id BETWEEN 1 AND 7', function (err, managers) {
+        connection.query('SELECT id, CONCAT(first_name, " ", last_name) AS manager_name FROM employee WHERE manager_id = NULL OR role_id BETWEEN 1 AND 7', function (err, managers) {
             if (err) throw err;
 
             inquirer
@@ -342,7 +343,7 @@ function viewByManager() {
                         type: 'list',
                         name: 'manager_id',
                         message: 'Select the manager to view the employees they oversee: ',
-                        choices: managers.map((manager) => ({ name: manager.manager_name, value: manager.manager_id })),
+                        choices: managers.map((manager) => ({ name: manager.manager_name, value: manager.id })),
                     },
                 ])
                 .then(function (answer) {
@@ -417,8 +418,6 @@ function viewByDepartment() {
 
                         // Display the result in a table format
                         console.table(res);
-
-                        // Call the start function (assuming it's defined somewhere)
                         start();
                     });
                 });

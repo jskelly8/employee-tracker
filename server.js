@@ -6,7 +6,7 @@ require('dotenv').config();
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: process.env.DB_PW, // Fill yours in here if testing code
+    password: process.env.DB_PW,  // Using environment variable for database password
     database: 'company_db',
 });
 
@@ -91,18 +91,18 @@ function start() {
                     deleteEmployee();
                     break;
                 case 'Exit':
-                    connection.end();
+                    connection.end(); // Close the database connection and exit the application
                     break;
             }
         });
 };
 
-// Each choice's functions --------------
+// Functions for each menu option --------------
 
 // Function to view all departments
 function viewAllDepartments() {
     try {
-        const query = `SELECT * FROM department`; // MySQL query to retrieve requested data
+        const query = `SELECT * FROM department`; // MySQL query to retrieve all department data
         connection.query(query, function (err, res) {
             if (err) throw err;
             console.table(res); // Show data in formatted table
@@ -117,6 +117,7 @@ function viewAllDepartments() {
 // Function to view all roles
 function viewAllRoles() {
     try {
+        // MySQL query to retrieve role data along with department information
         const query = `
             SELECT role.id,
                 role.title,
@@ -139,6 +140,7 @@ function viewAllRoles() {
 // Function to view all employees
 function viewAllEmployees() {
     try {
+        // MySQL query to retrieve employee data along with role, department, and manager information
         const query = `
             SELECT employee.id,
                 employee.first_name,
@@ -219,6 +221,7 @@ function addRole() {
                     },
                 ])
                 .then(function (answer) {
+                    // Insert the new role into the database
                     const query = `INSERT INTO role SET ?`;
                     connection.query(
                         query,
@@ -296,11 +299,13 @@ function addEmployee() {
 // Function to update an employee
 function updateEmployee() {
     try {
+        // Fetch employees and roles from the database
         connection.query(`SELECT id, CONCAT(first_name, ' ', last_name) AS full_name FROM employee`, function (err, employees) {
             if (err) throw err;
             connection.query(`SELECT id, title FROM role`, function (err, roles) {
                 if (err) throw err;
 
+                // Prompt user to choose employee and new role
                 inquirer
                     .prompt([
                         {
@@ -316,6 +321,7 @@ function updateEmployee() {
                             choices: roles.map((role) => ({ name: role.title, value: role.id })),
                         },
                     ])
+                    // Update the role of the selected employee in the database
                     .then(function (answer) {
                         const query = `UPDATE employee SET role_id = ? WHERE id = ?`;
                         connection.query(query, [answer.role_id, answer.employee_id], function (err) {
@@ -334,9 +340,11 @@ function updateEmployee() {
 // Function to view employees grouped by manager
 function viewByManager() {
     try {
+        // Fetch managers from the database
         connection.query('SELECT id, CONCAT(first_name, " ", last_name) AS manager_name FROM employee WHERE manager_id = NULL OR role_id BETWEEN 1 AND 7', function (err, managers) {
             if (err) throw err;
 
+            // Prompt user to choose a manager
             inquirer
                 .prompt([
                     {
@@ -346,6 +354,7 @@ function viewByManager() {
                         choices: managers.map((manager) => ({ name: manager.manager_name, value: manager.id })),
                     },
                 ])
+                // Query to retrieve employees overseen by the selected manager
                 .then(function (answer) {
                     const query = `
                         SELECT 
@@ -365,6 +374,7 @@ function viewByManager() {
                         employee.manager_id = ?
                     `;
 
+                    // Execute the query with the selected manager_id
                     connection.query(query, [answer.manager_id], function (err, res) {
                         if (err) throw err;
                         console.table(res);
@@ -430,9 +440,11 @@ function viewByDepartment() {
 // Function to view the total utilized budget
 function viewBudget() {
     try {
+        // Fetch departments from the database
         connection.query('SELECT id, name FROM department', function (err, departments) {
             if (err) throw err;
 
+            // Prompt user to choose a department
             inquirer
                 .prompt([
                     {
@@ -455,6 +467,7 @@ function viewBudget() {
                             role.department_id = ?
                     `;
 
+                    // Execute the query with the selected department_id
                     connection.query(query, [answer.department_id], function (err, res) {
                         if (err) throw err;
 
@@ -479,9 +492,11 @@ function viewBudget() {
 //Function to update the manager of an employee
 function updateManager() {
     try {
+        // Fetch employees from the database
         connection.query('SELECT id, first_name, last_name FROM employee', function (err, employees) {
             if (err) throw err;
 
+            // Prompt user to choose an employee and a new manager
             inquirer
                 .prompt([
                     {
@@ -497,6 +512,7 @@ function updateManager() {
                         choices: employees.map((employee) => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id })),
                     },
                 ])
+                // Update the manager of the selected employee in the database
                 .then(function (answer) {
                     const query = 'UPDATE employee SET manager_id = ? WHERE id = ?';
 
@@ -517,6 +533,7 @@ function deleteDepartment() {
     connection.query('SELECT id, name FROM department', async (err, departments) => {
         if (err) throw err;
 
+        // Prompt user to choose a department for deletion
         const answer = await inquirer.prompt([
             {
                 type: 'list',
@@ -526,6 +543,7 @@ function deleteDepartment() {
             }
         ]);
 
+        // Delete the selected department from the database
         const query = 'DELETE FROM department WHERE id = ?';
         connection.query(query, [answer.department_id], (err) => {
             if (err) throw err;
@@ -540,6 +558,7 @@ function deleteRole() {
     connection.query('SELECT id, title FROM role', async (err, roles) => {
         if (err) throw err;
 
+        // Prompt user to choose a role for deletion
         const answer = await inquirer.prompt([
             {
                 type: 'list',
@@ -549,6 +568,7 @@ function deleteRole() {
             }
         ]);
 
+        // Delete the selected role from the database
         const query = 'DELETE FROM role WHERE id = ?';
         connection.query(query, [answer.role_id], (err) => {
             if (err) throw err;
@@ -563,6 +583,7 @@ function deleteEmployee() {
     connection.query('SELECT id, CONCAT(first_name, " ", last_name) AS full_name FROM employee', async (err, employees) => {
         if (err) throw err;
 
+        // Prompt user to choose an employee for deletion
         const answer = await inquirer.prompt([
             {
                 type: 'list',
@@ -572,6 +593,7 @@ function deleteEmployee() {
             }
         ]);
 
+        // Delete the selected employee from the database
         const query = 'DELETE FROM employee WHERE id = ?';
         connection.query(query, [answer.employee_id], (err) => {
             if (err) throw err;

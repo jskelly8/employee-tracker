@@ -22,6 +22,8 @@ When the command line program is run to access the database, you will be given i
 
 In order to run the program, please use `npm i` in order to install the required dependiencies listed in the package.json being "dotenv", "inquirer", & "mysql2".
 
+Also be sure to log into MySQL inside the terminal, and enter both `source schema.sql` & `source seeds.sql` in order to ensure complete connection to the created database.
+
 ## Usage
 
 Begin the program by typing into your terminal `node server.js` (Please make sure to have previously installed the programs dependencies mentioned in the [Installation](#installation) section) -- Then just select any desired option from the menu and follow any additional prompts if they come up.

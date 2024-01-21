@@ -34,7 +34,7 @@ function start() {
                     'Add a Department',
                     'Add a Role',
                     'Add an Employee',
-                    'Update an Employee',
+                    'Update an Employee Role',
                     'View Employees by Manager',
                     'View Employees by Department',
                     'View total utilized budget',
@@ -66,7 +66,7 @@ function start() {
                 case 'Add an Employee':
                     addEmployee();
                     break;
-                case 'Update an Employee':
+                case 'Update an Employee Role':
                     updateEmployee();
                     break;
                 case 'View Employees by Manager':

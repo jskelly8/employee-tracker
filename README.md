@@ -27,10 +27,9 @@ In order to run the program, please use `npm i` in order to install the required
 Begin the program by typing into your terminal `node server.js` (Please make sure to have previously installed the programs dependencies mentioned in the [Installation](#installation) section) -- Then just select any desired option from the menu and follow any additional prompts if they come up.
 
 Walkthrough video showing functionality of program:
+* Link to walkthrough video: *(click the code snippet)*
 
-    ```md
-    ![alt text](assets/images/screenshot.png)
-    ```
+[![Screenshot of code snippet](./EmployeeTrackerClip.png)](https://watch.screencastify.com/v/rR2gutq4RrE6lVeuCYAY "Walkthrough Video")
 
 ## Credits
 

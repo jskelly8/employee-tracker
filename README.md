@@ -35,7 +35,7 @@ Walkthrough video showing functionality of program:
 
 ## Credits
 
-I recieved some help from my tutor, Bobbi Tarkany, debugging the functions for viewByManager & updateManager as well as adding .env functionality in order to protect passwords using good practice. Please check out her work by visiting her [GitHub]().
+I recieved some help from my tutor, Bobbi Tarkany, debugging the functions for viewByManager & updateManager as well as adding .env functionality in order to protect passwords using good practice. Please check out her work by visiting her [GitHub](https://github.com/bltarkany).
 
 ## License
 
